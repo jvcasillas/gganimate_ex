@@ -1,0 +1,142 @@
+---
+title: "gganimate for Stefano"
+author: "JVC"
+date: "`r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+```
+
+
+# Get setup
+
+```{r}
+#| label: libs-funcs
+#| message: false
+library("here")
+library("ggplot2")
+library("tibble")
+library("dplyr")
+library("gganimate")
+library("av")
+library("gifski")
+library("readr")
+
+theme_clear <- function() {
+  list(
+    theme_void(), 
+    theme(panel.background = element_rect(fill = "white", colour = "white"))
+  )
+}
+
+```
+
+---
+
+Create data
+
+```{r}
+#| label: create-data
+
+movement_circle_data <- tribble(
+  ~"x", ~"y", ~"size", ~"color", ~"shape", ~"stroke", ~"s", 
+  0, 0,   0, "black", 21,  0, 1, 
+  0, 0,   0, "white", 21,  0, 1, 
+  0, 0,   0, "black", 21, 30, 1, 
+  0, 0,  20, "white", 21, 30, 1, 
+  0, 0,  60, "black", 21, 45, 1, 
+  0, 0, 120, "white", 21, 30, 1, 
+  0, 0,   0, "black", 21,  0, 2, 
+  0, 0,   0, "white", 21, 30, 2, 
+  0, 0,  20, "black", 21, 30, 2, 
+  0, 0,  60, "white", 21, 45, 2, 
+  0, 0, 120, "black", 21, 30, 2, 
+  0, 0, 160, "white", 21,  0, 2, 
+  0, 0,   0, "black", 21, 30, 3, 
+  0, 0,  20, "white", 21, 30, 3, 
+  0, 0,  60, "black", 21, 45, 3, 
+  0, 0, 120, "white", 21, 30, 3, 
+  0, 0, 160, "black", 21,  0, 3, 
+  0, 0, 160, "white", 21,  0, 3, 
+) 
+
+```
+
+---
+
+Basic plot
+
+```{r}
+#| label: base-plot
+
+p_movement_circle <- movement_circle_data %>% 
+  ggplot() + 
+    geom_point(aes(x = x, y = y, size = size, color = color, shape = shape, 
+      stroke = stroke), 
+      show.legend = F) +
+    scale_size_identity() + 
+    scale_color_identity() + 
+    scale_shape_identity() + 
+    coord_cartesian(xlim = c(-0.4, 0.4), ylim = c(-0.4, 0.4), expand = F) + 
+    theme_clear() 
+  
+```
+
+---
+
+Its nothing special
+
+```{r}
+#| label: show-plot
+
+p_movement_circle
+```
+
+---
+
+But if we add transition states we can animate it.
+
+```{r}
+#| label: add-animation
+low_complexity_movement_circle_c1 <- p_movement_circle + 
+  transition_states(
+    s, 
+    transition_length = 0.1, 
+    state_length = 0, 
+    wrap = F
+  ) 
+
+low_complexity_movement_circle_c1_p <- animate(
+  low_complexity_movement_circle_c1, 
+  fps = 50, duration = 2.0, height = 5, width = 5, 
+  units = "in", res = 150, 
+  renderer = gifski_renderer()
+  )
+```
+
+---
+
+```{r}
+#| label: print-animation
+#| out.width: "75%"
+#| fig.align: "center"
+low_complexity_movement_circle_c1_p
+```
+
+---
+
+# Save with `anim_save`
+
+```
+anim_save("circle_low_complexity_movement_c1.gif", 
+  low_complexity_movement_circle_c1_p)
+```
